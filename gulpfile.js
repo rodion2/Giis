@@ -36,7 +36,9 @@ gulp.task('browser-sync', function () { // Создаем таск browser-sync
 gulp.task('build', ['clean', 'sass', 'scripts'], function () {
 
     var buildCss = gulp.src([ // Переносим CSS стили в продакшен
+        'app/libs/bootstrap/dist/css/bootstrap.css',
         'app/css/main.css',
+        'app/libs/bootstrap/dist/css/bootstrap-theme.css',
         'app/css/libs.min.css'
     ])
         .pipe(gulp.dest('dist/css'))
@@ -53,7 +55,10 @@ gulp.task('build', ['clean', 'sass', 'scripts'], function () {
 
 
 gulp.task('css-libs', ['sass'], function () {
-    return gulp.src('app/css/libs.css') // Выбираем файл для минификации
+    return gulp.src([
+        'app/libs/bootstrap/dist/css/bootstrap.css',
+        'app/libs/bootstrap/dist/css/bootstrap-theme.css',
+        'app/css/libs.css']) // Выбираем файл для минификации
         .pipe(cssnano()) // Сжимаем
         .pipe(rename({suffix: '.min'})) // Добавляем суффикс .min
         .pipe(gulp.dest('app/css')); // Выгружаем в папку app/css
