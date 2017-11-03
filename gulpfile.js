@@ -5,7 +5,12 @@ var gulp = require('gulp'), // Подключаем Gulp
     uglify = require('gulp-uglifyjs'), // Подключаем gulp-uglifyjs (для сжатия JS)
     cssnano = require('gulp-cssnano'), // Подключаем пакет для минификации CSS
     rename = require('gulp-rename'), // Подключаем библиотеку для переименования файлов
-    del = require('del'); // Подключаем библиотеку для удаления файлов и папок
+    del = require('del'), // Подключаем библиотеку для удаления файлов и папок
+    gutil = require('gulp-util'),
+    coffeescript = require('gulp-coffeescript'),
+    coffeeStream = coffeescript({bare: true});
+
+coffeeStream.on('error', gutil.log);
 
 gulp.task('clean', function () {
     return del.sync('dist'); // Удаляем папку dist перед сборкой
@@ -44,7 +49,6 @@ gulp.task('build', ['clean', 'sass', 'scripts'], function () {
 
     var buildHtml = gulp.src('app/*.html') // Переносим HTML в продакшен
         .pipe(gulp.dest('dist'));
-
 });
 
 
@@ -55,11 +59,17 @@ gulp.task('css-libs', ['sass'], function () {
         .pipe(gulp.dest('app/css')); // Выгружаем в папку app/css
 });
 
+gulp.task('coffee', function() {
+    gulp.src('app/src/**/*.coffee')
+        .pipe(coffeescript({bare: true}).on('error', gutil.log))
+        .pipe(gulp.dest('app/js/src/'));
+});
 
-gulp.task('scripts', function () {
+gulp.task('scripts',['coffee'], function () {
     return gulp.src([ // Берем все необходимые библиотеки
         'app/libs/jquery/dist/jquery.min.js', // Берем jQuery
-        'app/libs/magnific-popup/dist/jquery.magnific-popup.min.js' // Берем Magnific Popup
+        'app/libs/angular/angular.js',
+        'app/libs/bootstrap/dist/js/bootstrap.js'
     ])
         .pipe(concat('libs.min.js')) // Собираем их в кучу в новом файле libs.min.js
         .pipe(uglify()) // Сжимаем JS файл
@@ -69,6 +79,6 @@ gulp.task('scripts', function () {
 gulp.task('watch', ['scripts', 'browser-sync', 'css-libs'], function () {
     gulp.watch('app/sass/**/*.sass', ['sass']); // Наблюдение за sass файлами
     gulp.watch('app/*.html', browserSync.reload); // Наблюдение за HTML файлами в корне проекта
+    gulp.watch('app/src/**/*.coffee',['coffee']);//Наблюдение за coffee файлами в app/src/
     gulp.watch('app/js/**/*.js', browserSync.reload); // Наблюдение за JS файлами в папке js
-
 });
